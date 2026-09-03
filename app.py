@@ -9,6 +9,20 @@ st.set_page_config(
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+# ------------------------
+# Session State
+# ------------------------
+
+if "prompt_a" not in st.session_state:
+    st.session_state.prompt_a = ""
+
+if "prompt_b" not in st.session_state:
+    st.session_state.prompt_b = ""
+
+# ------------------------
+# Header
+# ------------------------
+
 st.title("🧠 Prompt Evaluation Playground")
 st.caption("Compare prompts before spending API tokens.")
 
@@ -18,6 +32,7 @@ with left:
     st.subheader("Prompt A")
     prompt_a = st.text_area(
         "",
+        key="prompt_a",
         height=220,
         placeholder="Paste Prompt A here..."
     )
@@ -26,11 +41,16 @@ with right:
     st.subheader("Prompt B")
     prompt_b = st.text_area(
         "",
+        key="prompt_b",
         height=220,
         placeholder="Paste Prompt B here..."
     )
 
 st.divider()
+
+# ------------------------
+# Criteria
+# ------------------------
 
 st.subheader("Evaluation Criteria")
 
@@ -45,36 +65,64 @@ criteria = []
 
 if accuracy:
     criteria.append("Accuracy")
+
 if reasoning:
     criteria.append("Reasoning")
+
 if structure:
     criteria.append("Structure")
+
 if creativity:
     criteria.append("Creativity")
+
 if safety:
     criteria.append("Safety")
+
 if readability:
     criteria.append("Readability")
 
-col1, col2 = st.columns([1,1])
+st.divider()
+
+col1, col2 = st.columns(2)
 
 with col1:
-    evaluate = st.button("🚀 Evaluate", use_container_width=True)
+    evaluate = st.button(
+        "🚀 Evaluate",
+        use_container_width=True,
+        type="primary"
+    )
 
 with col2:
-    clear = st.button("🗑️ Clear", use_container_width=True)
+    clear = st.button(
+        "🗑️ Clear",
+        use_container_width=True
+    )
+
+# ------------------------
+# Clear
+# ------------------------
 
 if clear:
+    st.session_state.prompt_a = ""
+    st.session_state.prompt_b = ""
     st.rerun()
+
+# ------------------------
+# Evaluate
+# ------------------------
 
 if evaluate:
 
-    if prompt_a.strip() == "" or prompt_b.strip() == "":
-        st.warning("Please fill both Prompt A and Prompt B.")
+    if not prompt_a.strip():
+        st.error("Prompt A is empty.")
+        st.stop()
+
+    if not prompt_b.strip():
+        st.error("Prompt B is empty.")
         st.stop()
 
     if len(criteria) == 0:
-        st.warning("Select at least one evaluation criterion.")
+        st.error("Please select at least one criterion.")
         st.stop()
 
     with st.spinner("Evaluating prompts..."):
@@ -93,35 +141,35 @@ Prompt B:
 Gunakan kriteria berikut:
 {", ".join(criteria)}
 
-Berikan jawaban dalam format markdown:
+Berikan hasil dalam format markdown.
 
 # 🏆 Winner
 (Prompt A / Prompt B)
 
 # 📊 Score
-- Accuracy:
-- Reasoning:
-- Structure:
-- Creativity:
-- Safety:
-- Readability:
+- Accuracy
+- Reasoning
+- Structure
+- Creativity
+- Safety
+- Readability
 
 # 🔍 Analysis
 
-### Prompt A
+## Prompt A
 - Kelebihan
 - Kekurangan
 
-### Prompt B
+## Prompt B
 - Kelebihan
 - Kekurangan
 
-### Kesimpulan
-Jelaskan prompt mana yang lebih baik dan mengapa.
+## Kesimpulan
+Jelaskan prompt mana yang lebih baik dan alasannya.
 """
         )
 
-    st.success("Evaluation completed!")
+    st.success("✅ Evaluation completed!")
 
     st.markdown(response.output_text)
 
@@ -133,5 +181,5 @@ Jelaskan prompt mana yang lebih baik dan mengapa.
         st.markdown("### Prompt B")
         st.write(prompt_b)
 
-        st.markdown("### Criteria")
+        st.markdown("### Evaluation Criteria")
         st.write(", ".join(criteria))
