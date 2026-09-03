@@ -42,10 +42,19 @@ criteria = st.multiselect(
         "Safety",
         "Readability"
     ],
-    default=["Accuracy","Reasoning","Structure"]
+    default=["Accuracy", "Reasoning", "Structure"]
 )
 
 if st.button("Evaluate"):
+
+    if not prompt_a or not prompt_b:
+        st.warning("Please fill both Prompt A and Prompt B.")
+        st.stop()
+
+    if not criteria:
+        st.warning("Please select at least one evaluation criterion.")
+        st.stop()
+
     with st.spinner("Evaluating..."):
 
         response = client.responses.create(
@@ -62,12 +71,12 @@ Prompt B:
 Nilai berdasarkan:
 {", ".join(criteria)}
 
-Berikan output dalam format markdown:
+Berikan output dalam format markdown berikut:
 
-## Winner
+# Winner
 (Prompt A / Prompt B)
 
-## Score
+# Score
 - Accuracy:
 - Reasoning:
 - Structure:
@@ -75,18 +84,20 @@ Berikan output dalam format markdown:
 - Safety:
 - Readability:
 
-## Analysis
+# Analysis
 Jelaskan kelebihan dan kekurangan masing-masing prompt.
 """
         )
 
     st.markdown(response.output_text)
 
- st.subheader("Prompt A")
-    st.write(prompt_a if prompt_a else "_No prompt provided._")
+    st.divider()
+
+    st.subheader("Prompt A")
+    st.write(prompt_a)
 
     st.subheader("Prompt B")
-    st.write(prompt_b if prompt_b else "_No prompt provided._")
+    st.write(prompt_b)
 
     st.subheader("Selected Criteria")
     st.write(criteria)
