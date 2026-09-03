@@ -46,10 +46,43 @@ criteria = st.multiselect(
 )
 
 if st.button("Evaluate"):
-    st.success("UI Ready")
-    st.info("Evaluator backend will be connected later.")
+    with st.spinner("Evaluating..."):
 
-    st.subheader("Prompt A")
+        response = client.responses.create(
+            model="gpt-5-mini",
+            input=f"""
+Bandingkan Prompt A dan Prompt B.
+
+Prompt A:
+{prompt_a}
+
+Prompt B:
+{prompt_b}
+
+Nilai berdasarkan:
+{", ".join(criteria)}
+
+Berikan output dalam format markdown:
+
+## Winner
+(Prompt A / Prompt B)
+
+## Score
+- Accuracy:
+- Reasoning:
+- Structure:
+- Creativity:
+- Safety:
+- Readability:
+
+## Analysis
+Jelaskan kelebihan dan kekurangan masing-masing prompt.
+"""
+        )
+
+    st.markdown(response.output_text)
+
+ st.subheader("Prompt A")
     st.write(prompt_a if prompt_a else "_No prompt provided._")
 
     st.subheader("Prompt B")
