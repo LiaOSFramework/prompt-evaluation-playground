@@ -1,10 +1,13 @@
 import streamlit as st
+from openai import OpenAI
 
 st.set_page_config(
     page_title="Prompt Evaluation Playground",
     page_icon="🧠",
     layout="wide"
 )
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.title("🧠 Prompt Evaluation Playground")
 st.caption("Compare prompts before spending API tokens.")
