@@ -32,30 +32,52 @@ with right:
 
 st.divider()
 
-criteria = st.multiselect(
-    "Evaluation Criteria",
-    [
-        "Accuracy",
-        "Reasoning",
-        "Structure",
-        "Creativity",
-        "Safety",
-        "Readability"
-    ],
-    default=["Accuracy", "Reasoning", "Structure"]
-)
+st.subheader("Evaluation Criteria")
 
-if st.button("Evaluate"):
+accuracy = st.checkbox("Accuracy", value=True)
+reasoning = st.checkbox("Reasoning", value=True)
+structure = st.checkbox("Structure", value=True)
+creativity = st.checkbox("Creativity")
+safety = st.checkbox("Safety")
+readability = st.checkbox("Readability")
 
-    if not prompt_a or not prompt_b:
+criteria = []
+
+if accuracy:
+    criteria.append("Accuracy")
+if reasoning:
+    criteria.append("Reasoning")
+if structure:
+    criteria.append("Structure")
+if creativity:
+    criteria.append("Creativity")
+if safety:
+    criteria.append("Safety")
+if readability:
+    criteria.append("Readability")
+
+col1, col2 = st.columns([1,1])
+
+with col1:
+    evaluate = st.button("🚀 Evaluate", use_container_width=True)
+
+with col2:
+    clear = st.button("🗑️ Clear", use_container_width=True)
+
+if clear:
+    st.rerun()
+
+if evaluate:
+
+    if prompt_a.strip() == "" or prompt_b.strip() == "":
         st.warning("Please fill both Prompt A and Prompt B.")
         st.stop()
 
-    if not criteria:
-        st.warning("Please select at least one evaluation criterion.")
+    if len(criteria) == 0:
+        st.warning("Select at least one evaluation criterion.")
         st.stop()
 
-    with st.spinner("Evaluating..."):
+    with st.spinner("Evaluating prompts..."):
 
         response = client.responses.create(
             model="gpt-5-mini",
@@ -68,15 +90,15 @@ Prompt A:
 Prompt B:
 {prompt_b}
 
-Nilai berdasarkan:
+Gunakan kriteria berikut:
 {", ".join(criteria)}
 
-Berikan output dalam format markdown berikut:
+Berikan jawaban dalam format markdown:
 
-# Winner
+# 🏆 Winner
 (Prompt A / Prompt B)
 
-# Score
+# 📊 Score
 - Accuracy:
 - Reasoning:
 - Structure:
@@ -84,20 +106,32 @@ Berikan output dalam format markdown berikut:
 - Safety:
 - Readability:
 
-# Analysis
-Jelaskan kelebihan dan kekurangan masing-masing prompt.
+# 🔍 Analysis
+
+### Prompt A
+- Kelebihan
+- Kekurangan
+
+### Prompt B
+- Kelebihan
+- Kekurangan
+
+### Kesimpulan
+Jelaskan prompt mana yang lebih baik dan mengapa.
 """
         )
 
+    st.success("Evaluation completed!")
+
     st.markdown(response.output_text)
 
-    st.divider()
+    with st.expander("📄 Input Summary"):
 
-    st.subheader("Prompt A")
-    st.write(prompt_a)
+        st.markdown("### Prompt A")
+        st.write(prompt_a)
 
-    st.subheader("Prompt B")
-    st.write(prompt_b)
+        st.markdown("### Prompt B")
+        st.write(prompt_b)
 
-    st.subheader("Selected Criteria")
-    st.write(criteria)
+        st.markdown("### Criteria")
+        st.write(", ".join(criteria))
